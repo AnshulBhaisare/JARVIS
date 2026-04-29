@@ -1,0 +1,20 @@
+services:
+  # Backend Service (FastAPI)
+  - type: web
+    name: jarvis-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jarvis-db
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PICOVOICE_ACCESS_KEY
+        sync: false
+
+databases:
+  - name: jarvis-db
+    plan: free
