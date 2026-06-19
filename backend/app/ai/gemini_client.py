@@ -93,7 +93,7 @@ async def map_intent(command: str, context: str = None) -> dict:
         }
 
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-flash-latest")
         user_prompt = f'User command: "{command}"'
         if context:
             user_prompt += f"\nContext: {context}"

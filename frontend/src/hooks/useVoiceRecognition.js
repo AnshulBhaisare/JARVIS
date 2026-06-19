@@ -67,6 +67,7 @@ const useVoiceRecognition = ({ onResult, onStart, onEnd }) => {
             awaitingCommand.current = true
             onStart()
             // Restart to capture command
+            // eslint-disable-next-line no-use-before-define
             setTimeout(() => { if (activeRef.current) listen() }, 300)
           }
         }
@@ -83,11 +84,12 @@ const useVoiceRecognition = ({ onResult, onStart, onEnd }) => {
       setIsListening(false)
       // If still active and not awaiting command, auto-restart (continuous mode)
       if (activeRef.current && !awaitingCommand.current) {
+        // eslint-disable-next-line no-use-before-define
         setTimeout(() => { if (activeRef.current) listen() }, 200)
       }
     }
 
-    try { rec.start() } catch (e) { /* already started */ }
+    try { rec.start() } catch { /* already started */ }
   }, [buildRecognition, onResult, onStart, onEnd])
 
   const startListening = useCallback(() => {
@@ -102,7 +104,7 @@ const useVoiceRecognition = ({ onResult, onStart, onEnd }) => {
     activeRef.current = false
     awaitingCommand.current = false
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop() } catch (e) {}
+      try { recognitionRef.current.stop() } catch { /* ignore */ }
     }
     setIsListening(false)
     setTranscript('')
@@ -118,7 +120,7 @@ const useVoiceRecognition = ({ onResult, onStart, onEnd }) => {
     return () => {
       activeRef.current = false
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop() } catch (e) {}
+        try { recognitionRef.current.stop() } catch { /* ignore */ }
       }
     }
   }, [])  // eslint-disable-line

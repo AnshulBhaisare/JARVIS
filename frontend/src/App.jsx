@@ -19,11 +19,11 @@ function App() {
   const [history, setHistory]               = useState([])
   const [pendingConfirm, setPendingConfirm] = useState(null)
 
-  useEffect(() => { loadHistory() }, [])
-
   const loadHistory = async () => {
     try { setHistory(await getHistory()) } catch (e) { console.error(e) }
   }
+
+  useEffect(() => { loadHistory() }, [])
 
   const executeElectronTool = async (tool, args) => {
     if (!isElectron()) return
