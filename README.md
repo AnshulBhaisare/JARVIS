@@ -22,7 +22,7 @@ Gemini AI + PostgreSQL
 | Frontend | React + Vite |
 | Backend | FastAPI + Python |
 | AI | Google Gemini API |
-| Voice | Web Speech API (en-IN) + Picovoice Porcupine |
+| Voice | Web Speech API (en-IN) |
 | Database | PostgreSQL (Render) |
 | Deployment | Render (backend) + Vercel (frontend) |
 
@@ -58,7 +58,6 @@ npm run build    # Build .exe
 ```
 GEMINI_API_KEY=your_key_here
 DATABASE_URL=postgresql://...
-PICOVOICE_ACCESS_KEY=your_key_here
 ```
 
 ### `frontend/.env`
