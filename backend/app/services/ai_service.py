@@ -1,26 +1,26 @@
 import os
 import httpx
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
-def _get_gemini_model():
+def _get_genai_client():
     api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key:
         return None
-    genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-flash-latest")
+    return genai.Client(api_key=api_key)
 
 
 async def answer_question(question: str) -> str:
-    model = _get_gemini_model()
-    if not model:
+    client = _get_genai_client()
+    if not client:
         return "Gemini API key not configured. Please add it to your .env file."
     try:
-        response = model.generate_content(
-            f"Answer this question clearly and concisely (max 3 paragraphs): {question}"
+        response = await client.aio.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=f"Answer this question clearly and concisely (max 3 paragraphs): {question}",
         )
         return response.text
     except Exception as e:
@@ -28,27 +28,31 @@ async def answer_question(question: str) -> str:
 
 
 async def generate_email(topic: str, recipient: str = None) -> str:
-    model = _get_gemini_model()
-    if not model:
+    client = _get_genai_client()
+    if not client:
         return "Gemini API key not configured."
     try:
         prompt = f"Write a professional email draft about: {topic}"
         if recipient:
             prompt += f". The email is addressed to: {recipient}"
         prompt += "\n\nFormat it as a complete email with Subject, greeting, body, and sign-off."
-        response = model.generate_content(prompt)
+        response = await client.aio.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+        )
         return response.text
     except Exception as e:
         return f"Error generating email: {str(e)}"
 
 
 async def explain_topic(topic: str) -> str:
-    model = _get_gemini_model()
-    if not model:
+    client = _get_genai_client()
+    if not client:
         return "Gemini API key not configured."
     try:
-        response = model.generate_content(
-            f"Explain this topic clearly with examples (suitable for a student or developer): {topic}"
+        response = await client.aio.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=f"Explain this topic clearly with examples (suitable for a student or developer): {topic}",
         )
         return response.text
     except Exception as e:
@@ -56,12 +60,13 @@ async def explain_topic(topic: str) -> str:
 
 
 async def summarize_text(text: str) -> str:
-    model = _get_gemini_model()
-    if not model:
+    client = _get_genai_client()
+    if not client:
         return "Gemini API key not configured."
     try:
-        response = model.generate_content(
-            f"Summarize the following text in bullet points:\n\n{text}"
+        response = await client.aio.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=f"Summarize the following text in bullet points:\n\n{text}",
         )
         return response.text
     except Exception as e:

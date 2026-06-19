@@ -1,14 +1,14 @@
 import os
 import json
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# Initialize the new google-genai client
+_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 TOOLS_CATALOG = """
 BROWSER TOOLS:
@@ -83,7 +83,7 @@ REQUIRED JSON FORMAT (return exactly this structure):
 
 async def map_intent(command: str, context: str = None) -> dict:
     """Use Gemini to map natural language to a tool + args."""
-    if not GEMINI_API_KEY:
+    if not _client:
         return {
             "tool": "ai.answer_question",
             "args": {"question": command},
@@ -93,17 +93,17 @@ async def map_intent(command: str, context: str = None) -> dict:
         }
 
     try:
-        model = genai.GenerativeModel("gemini-flash-latest")
         user_prompt = f'User command: "{command}"'
         if context:
             user_prompt += f"\nContext: {context}"
 
-        response = model.generate_content(
-            [SYSTEM_PROMPT, user_prompt],
-            generation_config=genai.GenerationConfig(
-                temperature=0.1,
-                max_output_tokens=512,
-            ),
+        response = await _client.aio.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[SYSTEM_PROMPT, user_prompt],
+            config={
+                "temperature": 0.1,
+                "max_output_tokens": 512,
+            },
         )
 
         raw = response.text.strip()

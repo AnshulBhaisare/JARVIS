@@ -1,12 +1,25 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import voice, history, notes, tools
 from app.models.database import init_db
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    init_db()
+    print("[JARVIS] Database initialized. Backend is online.")
+    yield
+    # Shutdown
+    print("[JARVIS] Backend shutting down.")
+
+
 app = FastAPI(
     title="JARVIS AI Backend",
     description="Backend API for JARVIS AI Voice Assistant",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -16,12 +29,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-async def startup():
-    init_db()
-
 
 app.include_router(voice.router,   prefix="/api/voice",   tags=["Voice"])
 app.include_router(history.router, prefix="/api/history", tags=["History"])

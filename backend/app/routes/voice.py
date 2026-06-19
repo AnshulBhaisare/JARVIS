@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timezone
 from app.models.database import get_db, CommandHistory
 from app.models.schemas import CommandRequest, ToolResponse
 from app.ai.gemini_client import map_intent
@@ -40,10 +40,11 @@ async def process_command(request: CommandRequest, db: Session = Depends(get_db)
             tool_used=tool,
             response_text=result.get("response_text", ""),
             was_successful=True,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         ))
         db.commit()
-    except Exception:
-        pass
+    except Exception as e:
+        db.rollback()
+        print(f"[JARVIS] DB error saving command history: {e}")
 
     return ToolResponse(**result)
