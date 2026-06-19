@@ -19,7 +19,7 @@ async def answer_question(question: str) -> str:
         return "Gemini API key not configured. Please add it to your .env file."
     try:
         response = await client.aio.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=f"Answer this question clearly and concisely (max 3 paragraphs): {question}",
         )
         return response.text
@@ -37,7 +37,7 @@ async def generate_email(topic: str, recipient: str = None) -> str:
             prompt += f". The email is addressed to: {recipient}"
         prompt += "\n\nFormat it as a complete email with Subject, greeting, body, and sign-off."
         response = await client.aio.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
         )
         return response.text
@@ -51,7 +51,7 @@ async def explain_topic(topic: str) -> str:
         return "Gemini API key not configured."
     try:
         response = await client.aio.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=f"Explain this topic clearly with examples (suitable for a student or developer): {topic}",
         )
         return response.text
@@ -65,7 +65,7 @@ async def summarize_text(text: str) -> str:
         return "Gemini API key not configured."
     try:
         response = await client.aio.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=f"Summarize the following text in bullet points:\n\n{text}",
         )
         return response.text

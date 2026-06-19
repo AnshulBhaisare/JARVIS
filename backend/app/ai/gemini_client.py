@@ -98,7 +98,7 @@ async def map_intent(command: str, context: str = None) -> dict:
             user_prompt += f"\nContext: {context}"
 
         response = await _client.aio.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=[SYSTEM_PROMPT, user_prompt],
             config={
                 "temperature": 0.1,
