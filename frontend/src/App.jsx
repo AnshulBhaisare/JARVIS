@@ -4,6 +4,7 @@ import CommandHistory from './components/CommandHistory'
 import ResponsePanel from './components/ResponsePanel'
 import ControlBar from './components/ControlBar'
 import { processCommand, getHistory } from './services/api'
+import { checkLocalCommand } from './services/localCommandHandler'
 import { speak } from './voice/tts'
 import useVoiceRecognition from './hooks/useVoiceRecognition'
 import './index.css'
@@ -37,7 +38,13 @@ function App() {
     setResponse(null)
 
     try {
-      const result = await processCommand(command)
+      // 1. Fast-Path Local Command Check
+      let result = checkLocalCommand(command)
+
+      // 2. Fallback to Gemini API if not local
+      if (!result) {
+        result = await processCommand(command)
+      }
 
       if (result.requires_confirmation) {
         setPendingConfirm(result)

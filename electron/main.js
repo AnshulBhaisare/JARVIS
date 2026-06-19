@@ -56,6 +56,15 @@ function createTray() {
 
 // ─── App lifecycle ────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
+  const { session } = require('electron')
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'media') {
+      callback(true)
+    } else {
+      callback(false)
+    }
+  })
+
   createWindow()
   createTray()
 
