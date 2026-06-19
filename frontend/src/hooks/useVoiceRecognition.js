@@ -13,6 +13,9 @@ const useVoiceRecognition = ({ onResult, onStart, onEnd }) => {
   const awaitingCommand = useRef(false)
   const activeRef       = useRef(false)
 
+  // Use a ref to hold the listen function so callbacks can always access the latest version
+  const listenRef = useRef(null)
+
   const buildRecognition = useCallback(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) return null
@@ -66,9 +69,8 @@ const useVoiceRecognition = ({ onResult, onStart, onEnd }) => {
             // Wake word only — now listen for command
             awaitingCommand.current = true
             onStart()
-            // Restart to capture command
-            // eslint-disable-next-line no-use-before-define
-            setTimeout(() => { if (activeRef.current) listen() }, 300)
+            // Restart to capture command via ref
+            setTimeout(() => { if (activeRef.current && listenRef.current) listenRef.current() }, 300)
           }
         }
       }
@@ -84,13 +86,17 @@ const useVoiceRecognition = ({ onResult, onStart, onEnd }) => {
       setIsListening(false)
       // If still active and not awaiting command, auto-restart (continuous mode)
       if (activeRef.current && !awaitingCommand.current) {
-        // eslint-disable-next-line no-use-before-define
-        setTimeout(() => { if (activeRef.current) listen() }, 200)
+        setTimeout(() => { if (activeRef.current && listenRef.current) listenRef.current() }, 200)
       }
     }
 
     try { rec.start() } catch { /* already started */ }
   }, [buildRecognition, onResult, onStart, onEnd])
+
+  // Keep listenRef always up to date with the latest listen callback
+  useEffect(() => {
+    listenRef.current = listen
+  }, [listen])
 
   const startListening = useCallback(() => {
     if (activeRef.current) return
@@ -114,7 +120,11 @@ const useVoiceRecognition = ({ onResult, onStart, onEnd }) => {
   // Start passive wake-word listener on mount
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) return
+    if (!SR) {
+      console.warn('[JARVIS] Web Speech API not supported in this browser.')
+      return
+    }
+    console.log('[JARVIS] Voice recognition initialized — say "Jarvis" to wake up.')
     activeRef.current = true
     listen()
     return () => {
@@ -123,7 +133,7 @@ const useVoiceRecognition = ({ onResult, onStart, onEnd }) => {
         try { recognitionRef.current.stop() } catch { /* ignore */ }
       }
     }
-  }, [])  // eslint-disable-line
+  }, []) // eslint-disable-line
 
   return { isListening, transcript, startListening, stopListening }
 }
